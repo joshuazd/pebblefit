@@ -10,16 +10,30 @@
         "displayName": "FitProgress",
         "enableMultiJS": true,
         "messageKeys": [],
-        "projectType": "rocky",
+        "projectType": "native",
         "resources": {
-            "media": []
+            "media": [
+                {
+                    "file": "images/ic_favorite_white_18dp_1x.png",
+                    "name": "HEART_ICON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ic_directions_walk_white_18dp_1x.png",
+                    "name": "WALK_ICON",
+                    "targetPlatforms": null,
+                    "type": "png"
+                }
+            ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
             "basalt",
+            "chalk",
             "diorite"
         ],
-        "uuid": "003de3cc-9e88-4bdd-84f8-571a3befaf83",
+        "uuid": "4235b3fa-260d-4a8b-b7ca-b1b07ed424eb",
         "watchapp": {
             "watchface": true
         }
