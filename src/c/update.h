@@ -1,5 +1,10 @@
+#pragma once
+
 #include <pebble.h>
-extern void update_time();
-extern void update_date();
-extern void update_bpm();
-extern void update_steps();
+#include "graphics.h"
+
+void update_progress(Layer *layer, GContext *ctx);
+void update_time(TextLayer *s_time_layer);
+void update_date(TextLayer *s_date_layer);
+void update_bpm(TextLayer *s_bpm_layer);
+void update_steps(TextLayer *s_step_layer);

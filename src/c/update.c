@@ -1,7 +1,12 @@
-#include <pebble.h>
+#include "update.h"
 
+void update_progress(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  graphics_draw_rectangle(bounds, ctx);
+}
 
 void update_time(TextLayer *s_time_layer) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "updating time");
   // Get a tm structure
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
@@ -15,9 +20,9 @@ void update_time(TextLayer *s_time_layer) {
   } else {
     // Use 12 hour format
     strftime(s_buffer, sizeof(s_buffer), "%I:%M", tick_time);
-    APP_LOG(APP_LOG_LEVEL_INFO,"updating time layer");
     text_layer_set_text(s_time_layer,s_buffer+(('0' == s_buffer[0])?1:0));  
   }
+  APP_LOG(APP_LOG_LEVEL_INFO, "time updated");
 }
 
 void update_date(TextLayer *s_date_layer) {
@@ -33,7 +38,7 @@ void update_date(TextLayer *s_date_layer) {
 }
 
 void update_bpm(TextLayer *s_bpm_layer) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Updating bpm");
+  APP_LOG(APP_LOG_LEVEL_INFO, "updating bpm");
   HealthMetric metric = HealthMetricHeartRateBPM;
   
   APP_LOG(APP_LOG_LEVEL_INFO, "BPM: %d", 
@@ -41,10 +46,11 @@ void update_bpm(TextLayer *s_bpm_layer) {
   static char s_buffer[3];
   snprintf(s_buffer, 6, "%d", (int)health_service_peek_current_value(metric));
   text_layer_set_text(s_bpm_layer, s_buffer);
+  APP_LOG(APP_LOG_LEVEL_INFO, "bpm updated");
 }
 
 void update_steps(TextLayer *s_step_layer) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Updating step count");
+  APP_LOG(APP_LOG_LEVEL_INFO, "updating step count");
   HealthMetric metric = HealthMetricStepCount;
   time_t start = time_start_of_today();
   time_t end = time(NULL);
@@ -55,8 +61,6 @@ void update_steps(TextLayer *s_step_layer) {
   
   if(mask & HealthServiceAccessibilityMaskAvailable) {
     // Data is available!
-    APP_LOG(APP_LOG_LEVEL_INFO, "Steps today: %d", 
-            (int)health_service_sum_today(metric));
     static char s_buffer[6];
     snprintf(s_buffer, 6, "%d", (int)health_service_sum_today(metric));
     text_layer_set_text(s_step_layer, s_buffer);
@@ -65,4 +69,5 @@ void update_steps(TextLayer *s_step_layer) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Data unavailable!");
     text_layer_set_text(s_step_layer, "N/A");
   }
+  APP_LOG(APP_LOG_LEVEL_INFO, "step count updated");
 }
