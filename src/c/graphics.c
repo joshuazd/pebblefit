@@ -47,7 +47,8 @@ void graphics_draw_rectangle(GRect bounds, GContext *ctx, int border_parts, int 
       if(border_parts > 0) {
           s_my_path_ptr = gpath_create(&path);
           gpath_draw_outline(ctx, s_my_path_ptr);
-          last_point = (GPoint){(int)path.points[0].x, (int)path.points[1].y};
+          last_point.x = path.points[1].x;
+          last_point.y = path.points[1].y;
       }
       border_parts--;
   }
@@ -72,13 +73,17 @@ void graphics_draw_rectangle(GRect bounds, GContext *ctx, int border_parts, int 
     }
 
     APP_LOG(APP_LOG_LEVEL_INFO, "%d, %d", draw_to.x, draw_to.y);
+    const int x1=last_point.x;
+    const int y1=last_point.y;
+    const int x2=draw_to.x;
+    const int y2=draw_to.y;
 
     //static const GPathInfo LAST_PATH = {
     //  .num_points = 2,
-    //  .points = (GPoint []) {last_point, draw_to}}
+    //  .points = (GPoint []) {{x1, y1}, {x2, y2}}
     //};
-    //s_my_path_ptr = gpath_create(&LAST_PATH);
-    //gpath_draw_outline(ctx, s_my_path_ptr);
+    s_my_path_ptr = gpath_create(&(GPathInfo){.num_points=2, .points=((GPoint []){{x1, y1}, {x2, y2}})});
+    gpath_draw_outline(ctx, s_my_path_ptr);
   }
 
 //  gpath_draw_outline(ctx, s_my_path_ptr);
