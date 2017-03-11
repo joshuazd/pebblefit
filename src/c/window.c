@@ -21,6 +21,7 @@ void window_time_update() {
 
 void window_step_update() {
   update_steps(s_step_layer);
+  layer_mark_dirty(s_canvas_layer);
 }
 
 void window_bpm_update() {
