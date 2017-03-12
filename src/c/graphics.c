@@ -40,33 +40,36 @@ void graphics_draw_typical(GRect bounds, GContext *ctx, int pixels) {
     int offset = 9;
     int w = bounds.size.w, h = bounds.size.h;
 
+    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
+
     GPoint corners[] = {{w/2,offset}, {w-offset, offset}, {w-offset,h-offset}, {offset,h-offset}, {offset,offset}, {w/2,offset}};
     int num_corners = 6;
-
-    int last_corner = 0;
+    int last_corner = -1;
     for(int i=1; i<num_corners; ++i) {
         int distance = abs(corners[i].x - corners[i-1].x) + abs(corners[i].y - corners[i-1].y);
-        if(pixels > distance) {
+        if(pixels >= distance && last_corner == -1) {
             pixels -= distance;
-        } else {
+        } else if(last_corner == -1){
             last_corner = i-1;
         }
     }
 
+
     APP_LOG(APP_LOG_LEVEL_INFO, "Last corner: %d", last_corner);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
     GPoint point = (GPoint){0,0};
     GPoint last = corners[last_corner];
 
-    if(last.x == 138) {
-        if(last.y == 6) {
+    if(last.x == w-offset) {
+        if(last.y == offset) {
             point.x = last.x;
             point.y = last.y + pixels;
         } else {
             point.x = last.x - pixels;
             point.y = last.y;
         }
-    } else if(last.x == 6) {
-        if(last.y == 6) {
+    } else if(last.x == offset) {
+        if(last.y == offset) {
             point.x = last.x + pixels;
             point.y = last.y;
         } else {

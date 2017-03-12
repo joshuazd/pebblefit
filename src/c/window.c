@@ -18,6 +18,7 @@ void window_date_update() {
 
 void window_time_update() {
   update_time(s_time_layer);
+  layer_mark_dirty(s_typical_layer);
 }
 
 void window_step_update() {

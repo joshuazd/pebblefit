@@ -10,7 +10,14 @@ void update_typical(Layer *layer, GContext *ctx) {
     HealthMetric metric = HealthMetricStepCount;
     time_t start = time_start_of_today();
     time_t now = time(NULL);
-    time_t end = start + (SECONDS_PER_HOUR * HOURS_PER_DAY) - 1;
+    time_t end = start + SECONDS_PER_DAY - 1;
+
+    struct tm *time = gmtime(&start);
+    struct tm *end_time = gmtime(&end);
+
+    APP_LOG(APP_LOG_LEVEL_INFO, "time start: %d/%d %d:%d", time->tm_mon + 1, time->tm_mday, time->tm_hour, time->tm_min);
+
+    APP_LOG(APP_LOG_LEVEL_INFO, "time end: %d/%d %d:%d", end_time->tm_mon + 1, end_time->tm_mday, end_time->tm_hour, end_time->tm_min);
 
     HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric,
             start, now);
@@ -27,7 +34,6 @@ void update_typical(Layer *layer, GContext *ctx) {
         APP_LOG(APP_LOG_LEVEL_INFO, "Percent of typical: %d%%", (int)(percent_daily*100));
 
         pixels = (int)(percent_daily*perimeter);
-        APP_LOG(APP_LOG_LEVEL_INFO, "Remainder: %d", perimeter - pixels);
     } else {
         APP_LOG(APP_LOG_LEVEL_ERROR, "Data not available!");
 
@@ -40,14 +46,16 @@ void update_typical(Layer *layer, GContext *ctx) {
 void update_progress(Layer *layer, GContext *ctx) {
 
   GRect bounds = layer_get_bounds(layer);
-  int perimeter = 2*(bounds.size.w-6) + 2*(bounds.size.h-6);
+  int w = bounds.size.w, h = bounds.size.h;
+  int offset = 3;
+  int perimeter = 2*(w-(2*offset)) + 2*(h-(2*offset));
   int border_parts = 0;
   int pixels = 0;
 
   HealthMetric metric = HealthMetricStepCount;
   time_t start = time_start_of_today();
   time_t now = time(NULL);
-  time_t end = start + (SECONDS_PER_HOUR * HOURS_PER_DAY) - 1;
+  time_t end = start + SECONDS_PER_DAY - 1;
 
   // Check the metric has data available for today
   HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric,
@@ -63,36 +71,53 @@ void update_progress(Layer *layer, GContext *ctx) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Current steps for today: %d", cur_steps);
 
     float percent_of_steps = (float)cur_steps/avg_steps;
-    APP_LOG(APP_LOG_LEVEL_INFO, "Percent of typical: %i%%", (int)(percent_of_steps*100));
+    APP_LOG(APP_LOG_LEVEL_INFO, "Percent of total: %i%%", (int)(percent_of_steps*100));
 
     pixels = (int)(percent_of_steps*perimeter);
-    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels around perimeter: %i", pixels);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
 
-    // TOP_RIGHT
-    if ( pixels > 69 ) {
-      border_parts++;
-      pixels -= 64;
+    GPoint corners[] = {{w/2,offset}, {w-offset,offset}, {w-offset,h-offset}, {offset,h-offset}, {offset,offset}, {w/2,offset}};
+    int num_corners = 6;
+
+    bool last = false;
+    for(int i=1; i < num_corners && !last; ++i) {
+        int distance = abs(corners[i].x - corners[i-1].x) + abs(corners[i].y - corners[i-1].y);
+        if(pixels > distance) {
+            border_parts++;
+            pixels -= distance;
+        } else {
+            last = true;
+        }
     }
-    // RIGHT
-    if ( pixels > 162 ) {
-      border_parts++;
-      pixels -= 162;
-    }
-    // BOTTOM
-    if ( pixels > 138 ) {
-      border_parts++;
-      pixels -= 138;
-    }
-    // LEFT
-    if ( pixels > 162 ) {
-      border_parts++;
-      pixels -= 162;
-    }
-    // TOP LEFT
-    if ( pixels > 69 ) {
-      border_parts++;
-      pixels -= 69;
-    }
+    //// TOP_RIGHT
+    //if ( pixels > 69 ) {
+    //  border_parts++;
+    //  pixels -= 69;
+    //}
+
+
+    //APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
+    //// RIGHT
+    //if ( pixels > 162 ) {
+    //  border_parts++;
+    //  pixels -= 162;
+    //}
+    //// BOTTOM
+    //if ( pixels > 138 ) {
+    //  border_parts++;
+    //  pixels -= 138;
+    //}
+    //// LEFT
+    //if ( pixels > 162 ) {
+    //  border_parts++;
+    //  pixels -= 162;
+    //}
+    //// TOP LEFT
+    //if ( pixels > 69 ) {
+    //  border_parts++;
+    //  pixels -= 69;
+    //}
+
 
     APP_LOG(APP_LOG_LEVEL_INFO, "Border parts: %d, pixels: %d", border_parts, pixels);
 
@@ -164,6 +189,7 @@ void update_steps(TextLayer *s_step_layer) {
     // Data is available!
     static char s_buffer[6];
     cur_steps = (int)health_service_sum_today(metric);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Current step count: %d", cur_steps);
     snprintf(s_buffer, 6, "%d", cur_steps);
     text_layer_set_text(s_step_layer, s_buffer);
   } else {
