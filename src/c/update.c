@@ -1,12 +1,46 @@
 #include "update.h"
 
 static int cur_steps;
-static int perimeter;
+
+void update_typical(Layer *layer, GContext *ctx) {
+    GRect bounds = layer_get_bounds(layer);
+    int perimeter = 2*(bounds.size.w-18) + 2*(bounds.size.h-18);
+    int pixels = 0;
+
+    HealthMetric metric = HealthMetricStepCount;
+    time_t start = time_start_of_today();
+    time_t now = time(NULL);
+    time_t end = start + (SECONDS_PER_HOUR * HOURS_PER_DAY) - 1;
+
+    HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric,
+            start, now);
+
+    if(mask & HealthServiceAccessibilityMaskAvailable) {
+        int avg_steps, avg_daily_steps;
+        avg_steps = (int)health_service_sum_averaged(metric, start, now, HealthServiceTimeScopeWeekly);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Avg Step so far: %d", avg_steps);
+
+        avg_daily_steps = (int)health_service_sum_averaged(metric, start, end, HealthServiceTimeScopeWeekly);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Avg steps for this day: %d", avg_daily_steps);
+
+        float percent_daily = (float)avg_steps/avg_daily_steps;
+        APP_LOG(APP_LOG_LEVEL_INFO, "Percent of typical: %d%%", (int)(percent_daily*100));
+
+        pixels = (int)(percent_daily*perimeter);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Remainder: %d", perimeter - pixels);
+    } else {
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Data not available!");
+
+    }
+
+    graphics_draw_typical(bounds, ctx, pixels);
+
+}
 
 void update_progress(Layer *layer, GContext *ctx) {
-  
+
   GRect bounds = layer_get_bounds(layer);
-  perimeter = 2*bounds.size.w + 2*bounds.size.h;
+  int perimeter = 2*(bounds.size.w-6) + 2*(bounds.size.h-6);
   int border_parts = 0;
   int pixels = 0;
 
@@ -16,31 +50,27 @@ void update_progress(Layer *layer, GContext *ctx) {
   time_t end = start + (SECONDS_PER_HOUR * HOURS_PER_DAY) - 1;
 
   // Check the metric has data available for today
-  HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric, 
+  HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric,
     start, now);
-  
+
   if(mask & HealthServiceAccessibilityMaskAvailable) {
     // Data is available!
     int avg_steps;
-    avg_steps = (int)health_service_sum_averaged(metric, start, now, HealthServiceTimeScopeWeekly);
-    APP_LOG(APP_LOG_LEVEL_INFO, "Avg Step so far: %d", avg_steps);
-    
+
     avg_steps = (int)health_service_sum_averaged(metric, start, end, HealthServiceTimeScopeWeekly);
     APP_LOG(APP_LOG_LEVEL_INFO, "Avg steps for this day: %d", avg_steps);
-    
+
     APP_LOG(APP_LOG_LEVEL_INFO, "Current steps for today: %d", cur_steps);
 
     float percent_of_steps = (float)cur_steps/avg_steps;
-    APP_LOG(APP_LOG_LEVEL_INFO, "Percent of typical: %i%%", (int)(percent_of_steps*100)); 
+    APP_LOG(APP_LOG_LEVEL_INFO, "Percent of typical: %i%%", (int)(percent_of_steps*100));
 
     pixels = (int)(percent_of_steps*perimeter);
     APP_LOG(APP_LOG_LEVEL_INFO, "Pixels around perimeter: %i", pixels);
 
-  
-
     // TOP_RIGHT
     if ( pixels > 69 ) {
-      border_parts++; 
+      border_parts++;
       pixels -= 64;
     }
     // RIGHT
@@ -63,17 +93,17 @@ void update_progress(Layer *layer, GContext *ctx) {
       border_parts++;
       pixels -= 69;
     }
-    
+
     APP_LOG(APP_LOG_LEVEL_INFO, "Border parts: %d, pixels: %d", border_parts, pixels);
 
 
-    
+
   } else {
     // No data recorded yet today
     APP_LOG(APP_LOG_LEVEL_ERROR, "Data unavailable!");
   }
-  
-  graphics_draw_rectangle(bounds, ctx, border_parts, pixels);
+
+  graphics_draw_rectangle(bounds, ctx, border_parts == 0 ? -1 : border_parts, pixels);
 }
 
 void update_time(TextLayer *s_time_layer) {
@@ -91,7 +121,7 @@ void update_time(TextLayer *s_time_layer) {
   } else {
     // Use 12 hour format
     strftime(s_buffer, sizeof(s_buffer), "%I:%M", tick_time);
-    text_layer_set_text(s_time_layer,s_buffer+(('0' == s_buffer[0])?1:0));  
+    text_layer_set_text(s_time_layer,s_buffer+(('0' == s_buffer[0])?1:0));
   }
   APP_LOG(APP_LOG_LEVEL_INFO, "time updated");
 }
@@ -100,10 +130,10 @@ void update_date(TextLayer *s_date_layer) {
   APP_LOG(APP_LOG_LEVEL_INFO, "updating date");
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
-  
+
   static char s_buffer[8];
   strftime(s_buffer, sizeof(s_buffer), "%b %d", tick_time);
-  
+
   text_layer_set_text(s_date_layer, s_buffer);
   APP_LOG(APP_LOG_LEVEL_INFO, "date updated");
 }
@@ -111,8 +141,8 @@ void update_date(TextLayer *s_date_layer) {
 void update_bpm(TextLayer *s_bpm_layer) {
   APP_LOG(APP_LOG_LEVEL_INFO, "updating bpm");
   HealthMetric metric = HealthMetricHeartRateBPM;
-  
-  APP_LOG(APP_LOG_LEVEL_INFO, "BPM: %d", 
+
+  APP_LOG(APP_LOG_LEVEL_INFO, "BPM: %d",
           (int)health_service_peek_current_value(metric));
   static char s_buffer[3];
   snprintf(s_buffer, 3, "%d", (int)health_service_peek_current_value(metric));
@@ -127,9 +157,9 @@ void update_steps(TextLayer *s_step_layer) {
   time_t end = time(NULL);
 
   // Check the metric has data available for today
-  HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric, 
+  HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric,
     start, end);
-  
+
   if(mask & HealthServiceAccessibilityMaskAvailable) {
     // Data is available!
     static char s_buffer[6];
