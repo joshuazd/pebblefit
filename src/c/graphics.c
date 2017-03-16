@@ -139,3 +139,7 @@ void graphics_set_window(Window *window) {
   s_window = window;
 }
 
+
+void graphics_destroy() {
+    gpath_destroy(s_my_path_ptr);    
+}

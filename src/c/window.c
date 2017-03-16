@@ -71,6 +71,7 @@ static void main_window_unload(Window *window) {
   bitmap_layer_destroy(s_bitmap_layer_walk);
   gbitmap_destroy(s_bitmap_heart);
   bitmap_layer_destroy(s_bitmap_layer_heart);
+  graphics_destroy();
   layer_destroy(s_canvas_layer);
   layer_destroy(s_typical_layer);
 }
