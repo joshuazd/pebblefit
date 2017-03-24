@@ -54,6 +54,9 @@ void graphics_draw_typical(GRect bounds, GContext *ctx, int pixels) {
         }
     }
 
+    if(last_corner == -1) {
+      last_corner = 5;
+    }
 
     APP_LOG(APP_LOG_LEVEL_INFO, "Last corner: %d", last_corner);
     APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
