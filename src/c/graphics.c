@@ -117,7 +117,7 @@ void graphics_draw_rectangle(GRect bounds, GContext *ctx, int border_parts, int 
           draw_to = (GPoint){3, 165-pixels};
       } else {
           pixels = (pixels > 69) ? 69 : pixels;
-          draw_to = (GPoint){3, 3+pixels};
+          draw_to = (GPoint){3+pixels, 3};
       }
   } else if(border_parts == -1){
       draw_to = (GPoint){72+pixels, 3};
