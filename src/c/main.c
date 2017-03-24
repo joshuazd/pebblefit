@@ -5,7 +5,7 @@
 #include "graphics.h"
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  if(tick_time->tm_min == 0) {
+  if (tick_time->tm_min == 0) {
     window_date_update();
   }
   window_time_update();
@@ -13,33 +13,40 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 static void health_handler(HealthEventType event, void *context) {
   // Which type of event occurred?
-  switch(event) {
-    case HealthEventSignificantUpdate:
-      APP_LOG(APP_LOG_LEVEL_INFO,
-              "New HealthService HealthEventSignificantUpdate event");
-      window_step_update();
-      window_bpm_update();
-      break;
-    case HealthEventMovementUpdate:
-      APP_LOG(APP_LOG_LEVEL_INFO,
-              "New HealthService HealthEventMovementUpdate event");
-      window_step_update();
-      break;
-    case HealthEventSleepUpdate:
-      APP_LOG(APP_LOG_LEVEL_INFO,
-              "New HealthService HealthEventSleepUpdate event");
-      break;
-    case HealthEventMetricAlert:
-      APP_LOG(APP_LOG_LEVEL_INFO,
-              "New HealthService HealthEventMetricAlert event");
-      window_step_update();
-      window_bpm_update();
-      break;
-    case HealthEventHeartRateUpdate:
-      APP_LOG(APP_LOG_LEVEL_INFO,
-              "New HealthService HealthEventHeartRateUpdate event");
-      window_bpm_update();
-      break;
+  switch (event) {
+  case HealthEventSignificantUpdate:
+    APP_LOG(APP_LOG_LEVEL_INFO,
+            "New HealthService HealthEventSignificantUpdate event");
+    window_step_update();
+    window_bpm_update();
+    break;
+  case HealthEventMovementUpdate:
+    APP_LOG(APP_LOG_LEVEL_INFO,
+            "New HealthService HealthEventMovementUpdate event");
+    window_step_update();
+    break;
+  case HealthEventSleepUpdate:
+    APP_LOG(APP_LOG_LEVEL_INFO,
+            "New HealthService HealthEventSleepUpdate event");
+    break;
+  case HealthEventMetricAlert:
+    APP_LOG(APP_LOG_LEVEL_INFO,
+            "New HealthService HealthEventMetricAlert event");
+    window_step_update();
+    window_bpm_update();
+    break;
+  case HealthEventHeartRateUpdate:
+    APP_LOG(APP_LOG_LEVEL_INFO,
+            "New HealthService HealthEventHeartRateUpdate event");
+    window_bpm_update();
+    break;
+  }
+}
+
+static void bluetooth_callback(bool connected) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Checking bluetooth status");
+  if (!connected) {
+    vibes_short_pulse();
   }
 }
 
@@ -48,10 +55,14 @@ static void init() {
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   bool health_available = health_service_events_subscribe(health_handler, NULL);
-  if(health_available == false) {
+  if (health_available == false) {
     APP_LOG(APP_LOG_LEVEL_WARNING,
             "Health unavailable");
   }
+
+  connection_service_subscribe((ConnectionHandlers) {
+    .pebble_app_connection_handler = bluetooth_callback
+  });
 
   main_window_push();
 
