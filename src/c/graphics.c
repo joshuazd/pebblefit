@@ -3,35 +3,34 @@
 
 static Window *s_window;
 
+// GPath for extra path
 static GPath *s_my_path_ptr = NULL;
+
+// GPath array for sides
+static GPath* path_ptrs[] = {NULL, NULL, NULL, NULL, NULL};
 
 static const GPathInfo TOP_RIGHT_PATH = {
   .num_points = 2,
-  //.points = (GPoint []) {{21, 0}, {14, 26}, {28, 26}, {7, 60}, {14, 34}, {0, 34}}
   .points = (GPoint []) {{72,3}, {141,3}}
 };
 
 static const GPathInfo RIGHT_PATH = {
   .num_points = 2,
-  //.points = (GPoint []) {{21, 0}, {14, 26}, {28, 26}, {7, 60}, {14, 34}, {0, 34}}
   .points = (GPoint []) {{141,3}, {141,165}}
 };
 
 static const GPathInfo BOTTOM_PATH = {
   .num_points = 2,
-  //.points = (GPoint []) {{21, 0}, {14, 26}, {28, 26}, {7, 60}, {14, 34}, {0, 34}}
   .points = (GPoint []) {{141,165}, {3,165}}
 };
 
 static const GPathInfo LEFT_PATH = {
   .num_points = 2,
-  //.points = (GPoint []) {{21, 0}, {14, 26}, {28, 26}, {7, 60}, {14, 34}, {0, 34}}
   .points = (GPoint []) {{3,165}, {3,3}}
 };
 
 static const GPathInfo TOP_LEFT_PATH = {
   .num_points = 2,
-  //.points = (GPoint []) {{21, 0}, {14, 26}, {28, 26}, {7, 60}, {14, 34}, {0, 34}}
   .points = (GPoint []) {{3,3}, {72,3}}
 };
 
@@ -39,8 +38,6 @@ void graphics_draw_typical(GRect bounds, GContext *ctx, int pixels) {
     graphics_context_set_fill_color(ctx, GColorWhite);
     int offset = 9;
     int w = bounds.size.w, h = bounds.size.h;
-
-    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
 
     GPoint corners[] = {{w/2,offset}, {w-offset, offset}, {w-offset,h-offset}, {offset,h-offset}, {offset,offset}, {w/2,offset}};
     int num_corners = 6;
@@ -58,8 +55,6 @@ void graphics_draw_typical(GRect bounds, GContext *ctx, int pixels) {
       last_corner = 5;
     }
 
-    APP_LOG(APP_LOG_LEVEL_INFO, "Last corner: %d", last_corner);
-    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
     GPoint point = (GPoint){0,0};
     GPoint last = corners[last_corner];
 
@@ -99,8 +94,8 @@ void graphics_draw_rectangle(GRect bounds, GContext *ctx, int border_parts, int 
   for(int i=0; i < PATH_COUNT; ++i) {
       GPathInfo path = paths[i];
       if(border_parts > 0) {
-          s_my_path_ptr = gpath_create(&path);
-          gpath_draw_outline(ctx, s_my_path_ptr);
+          //s_my_path_ptr = gpath_create(&path);
+          gpath_draw_outline(ctx, path_ptrs[i]);
           last_point.x = path.points[1].x;
           last_point.y = path.points[1].y;
           border_parts--;
@@ -132,6 +127,9 @@ void graphics_draw_rectangle(GRect bounds, GContext *ctx, int border_parts, int 
   const int y2=draw_to.y;
 
   if(x2 != 0) {
+      if(s_my_path_ptr != NULL) {
+        gpath_destroy(s_my_path_ptr);
+      }
       s_my_path_ptr = gpath_create(&(GPathInfo){.num_points=2, .points=((GPoint []){{x1, y1}, {x2, y2}})});
       gpath_draw_outline(ctx, s_my_path_ptr);
   }
@@ -142,7 +140,18 @@ void graphics_set_window(Window *window) {
   s_window = window;
 }
 
+void graphics_init() {
+  path_ptrs[0] = gpath_create(&TOP_RIGHT_PATH);
+  path_ptrs[1] = gpath_create(&RIGHT_PATH);
+  path_ptrs[2] = gpath_create(&BOTTOM_PATH);
+  path_ptrs[3] = gpath_create(&LEFT_PATH);
+  path_ptrs[4] = gpath_create(&TOP_LEFT_PATH);
+}
+
 
 void graphics_destroy() {
     gpath_destroy(s_my_path_ptr);    
+    for(int i=0; i<5; ++i) {
+      gpath_destroy(path_ptrs[i]);
+    }
 }

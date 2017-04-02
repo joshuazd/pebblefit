@@ -21,13 +21,12 @@ void update_typical(Layer *layer, GContext *ctx) {
   if (mask & HealthServiceAccessibilityMaskAvailable) {
     int avg_steps, avg_daily_steps;
     avg_steps = (int)health_service_sum_averaged(metric, start, now, HealthServiceTimeScopeWeekly);
-    APP_LOG(APP_LOG_LEVEL_INFO, "Avg Step so far: %d", avg_steps);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Avg steps so far: %d", avg_steps);
 
     avg_daily_steps = (int)health_service_sum_averaged(metric, start, end, HealthServiceTimeScopeWeekly);
     APP_LOG(APP_LOG_LEVEL_INFO, "Avg steps for this day: %d", avg_daily_steps);
 
     float percent_daily = (float)avg_steps / avg_daily_steps;
-    APP_LOG(APP_LOG_LEVEL_INFO, "Percent of typical: %d%%", (int)(percent_daily * 100));
 
     pixels = (int)(percent_daily * perimeter);
   } else {
@@ -69,7 +68,6 @@ void update_progress(Layer *layer, GContext *ctx) {
     float percent_of_steps = (float)cur_steps / avg_steps;
 
     pixels = (int)(percent_of_steps * perimeter);
-    APP_LOG(APP_LOG_LEVEL_INFO, "Pixels: %d", pixels);
 
     GPoint corners[] = {{w / 2, offset}, {w - offset, offset}, {w - offset, h - offset}, {offset, h - offset}, {offset, offset}, {w / 2, offset}};
     int num_corners = 6;
@@ -84,8 +82,6 @@ void update_progress(Layer *layer, GContext *ctx) {
         last = true;
       }
     }
-
-    APP_LOG(APP_LOG_LEVEL_INFO, "Border parts: %d, pixels: %d", border_parts, pixels);
 
   } else {
     // No data recorded yet today

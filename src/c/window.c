@@ -93,6 +93,7 @@ void main_window_push() {
   window_stack_push(s_main_window, true);
 
   graphics_set_window(s_main_window);
+  graphics_init();
 }
 
 void main_window_destroy() {

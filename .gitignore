@@ -1,2 +1,3 @@
 build/
 *.swp
+.lock-waf_linux2_build
