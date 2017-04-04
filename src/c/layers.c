@@ -62,7 +62,11 @@ void create_step_icon(Layer *window_layer, GBitmap *s_bitmap_walk, BitmapLayer *
   APP_LOG(APP_LOG_LEVEL_INFO, "creating step icon layer");
 
   s_bitmap_walk = gbitmap_create_with_resource(RESOURCE_ID_WALK_ICON);
-  s_bitmap_layer_walk = bitmap_layer_create(GRect(28, 103, 18, 18));
+  if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+    s_bitmap_layer_walk = bitmap_layer_create(GRect(28, 103, 18, 18));
+  } else {
+    s_bitmap_layer_walk = bitmap_layer_create(GRect(28, 115, 18, 18));
+  }
   bitmap_layer_set_compositing_mode(s_bitmap_layer_walk, GCompOpSet);
   bitmap_layer_set_bitmap(s_bitmap_layer_walk, s_bitmap_walk);
 

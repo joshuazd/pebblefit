@@ -44,15 +44,23 @@ static void main_window_load(Window *window) {
   s_date_layer = text_layer_create(GRect(0, (h/3)+5, w, 56));
   create_date_layer(window_layer,s_date_layer);
 
-  s_step_layer = text_layer_create(GRect(50, PBL_IF_ROUND_ELSE(75,95), w, 50));
+  if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+    s_step_layer = text_layer_create(GRect(50, PBL_IF_ROUND_ELSE(75,95), w, 50));
+  } else {
+    s_step_layer = text_layer_create(GRect(50, PBL_IF_ROUND_ELSE(75,107), w, 50));
+  }
   create_step_layer(window_layer,s_step_layer);
 
-  s_bpm_layer = text_layer_create(GRect(50, PBL_IF_ROUND_ELSE(75,120), w, 50));
-  create_bpm_layer(window_layer,s_bpm_layer);
+  if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+    s_bpm_layer = text_layer_create(GRect(50, PBL_IF_ROUND_ELSE(75,120), w, 50));
+    create_bpm_layer(window_layer,s_bpm_layer);
+  }
 
   create_step_icon(window_layer, s_bitmap_walk, s_bitmap_layer_walk);
 
-  create_heart_icon(window_layer, s_bitmap_heart, s_bitmap_layer_heart);
+  if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+    create_heart_icon(window_layer, s_bitmap_heart, s_bitmap_layer_heart);
+  }
 
   s_canvas_layer = layer_create(bounds);
   layer_set_update_proc(s_canvas_layer, update_progress);
@@ -69,8 +77,10 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_step_layer);
   gbitmap_destroy(s_bitmap_walk);
   bitmap_layer_destroy(s_bitmap_layer_walk);
-  gbitmap_destroy(s_bitmap_heart);
-  bitmap_layer_destroy(s_bitmap_layer_heart);
+  if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+    gbitmap_destroy(s_bitmap_heart);
+    bitmap_layer_destroy(s_bitmap_layer_heart);
+  }
   graphics_destroy();
   layer_destroy(s_canvas_layer);
   layer_destroy(s_typical_layer);

@@ -12,9 +12,6 @@ void update_typical(Layer *layer, GContext *ctx) {
   time_t now = time(NULL);
   time_t end = start + SECONDS_PER_DAY - 1;
 
-  struct tm *time = gmtime(&start);
-  struct tm *end_time = gmtime(&end);
-
   HealthServiceAccessibilityMask mask = health_service_metric_accessible(metric,
                                         start, now);
 

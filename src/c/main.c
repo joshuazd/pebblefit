@@ -18,7 +18,9 @@ static void health_handler(HealthEventType event, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO,
             "New HealthService HealthEventSignificantUpdate event");
     window_step_update();
-    window_bpm_update();
+    if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+      window_bpm_update();
+    }
     break;
   case HealthEventMovementUpdate:
     APP_LOG(APP_LOG_LEVEL_INFO,
@@ -36,9 +38,11 @@ static void health_handler(HealthEventType event, void *context) {
     window_bpm_update();
     break;
   case HealthEventHeartRateUpdate:
-    APP_LOG(APP_LOG_LEVEL_INFO,
-            "New HealthService HealthEventHeartRateUpdate event");
-    window_bpm_update();
+    if(watch_info_get_model() == WATCH_INFO_MODEL_PEBBLE_2_HR) {
+      APP_LOG(APP_LOG_LEVEL_INFO,
+              "New HealthService HealthEventHeartRateUpdate event");
+      window_bpm_update();
+    }
     break;
   }
 }
