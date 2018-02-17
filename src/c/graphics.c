@@ -150,7 +150,7 @@ void graphics_init() {
 
 
 void graphics_destroy() {
-    gpath_destroy(s_my_path_ptr);    
+    gpath_destroy(s_my_path_ptr);
     for(int i=0; i<5; ++i) {
       gpath_destroy(path_ptrs[i]);
     }
